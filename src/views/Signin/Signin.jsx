@@ -2,13 +2,11 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import AppContext from "../../AppContext"; // Импортируем контекст
 
-
-
 function Signin() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
-  const { setUser } = useContext(AppContext);
+  const { setUser } = useContext(AppContext); // ✅ Берём setUser из контекста
   const navigate = useNavigate();
 
   const sendForm = () => {
@@ -27,14 +25,21 @@ function Signin() {
       })
       .then((data) => {
         console.log("✅ Авторизація успішна:", data);
-        setUser(data); // ✅ Сохраняем пользователя в контекст
+    
+        if (data.token) { // ✅ Если сервер возвращает токен
+          setUser({ ...data, token: data.token }); // ✅ Сохраняем токен
+          localStorage.setItem("token", data.token); // ✅ Сохраняем токен в localStorage
+        } else {
+          setUser(data); // ✅ Если токена нет, просто сохраняем данные
+        }
+    
         navigate("/profile"); // ✅ Перенаправляем на профиль
       })
       .catch((error) => {
         console.error("❌ Помилка входу:", error);
         setResponseMessage("Невірний логін або пароль");
       });
-  };
+    }
 
   return (
     <div style={styles.container}>
