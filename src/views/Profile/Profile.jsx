@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppContext from "../../AppContext.jsx";
-const API_URL = "http://localhost:8081/Java_Web_211_war/";
+const API_URL = "http://localhost:8081/Java_Web_211_war";
 
 function Profile() {
     const { user } = useContext(AppContext);
@@ -18,7 +18,7 @@ function Profile() {
 }
 
 function AuthView({ user }) {
-    const { setUser, request } = useContext(AppContext);
+    const { setUser } = useContext(AppContext);
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -33,7 +33,7 @@ function AuthView({ user }) {
         if (user && Object.keys(user).length > 0) {
             setFormData({
                 name: user.name || "",
-                phone: user.phones?.[0] || "",  // Берем первый телефон, если есть
+                phone: user.phones?.[0] || "",
                 city: user.city || "",
                 address: user.address || "",
                 birthdate: user.birthdate || "Немає",
@@ -50,7 +50,7 @@ function AuthView({ user }) {
     };
 
     const saveChanges = async () => {
-        const userId = user?.id || user?.user_id;  // ✅ Гарантируем, что ID есть
+        const userId = user?.id || user?.user_id;
         if (!userId) {
             alert("❌ Помилка: ID користувача відсутній.");
             return;
@@ -70,7 +70,7 @@ function AuthView({ user }) {
             phones: formData.phone ? [formData.phone] : user.phones,
         };
 
-        // Гарантированно удаляем `password`, если он вдруг там есть
+        // Удаляем пароль, если вдруг присутствует
         delete updatedUser.password;
 
         // Очищаем от `null` и `undefined`
@@ -79,7 +79,7 @@ function AuthView({ user }) {
         );
 
         const requestUrl = `${API_URL}/users/${userId}`;
-        console.log("=== 📝 Відправка даних ===");
+        console.log("=== 📝 Відправка даних (PUT) ===");
         console.log("🔗 URL:", requestUrl);
         console.log("📤 Дані для відправки:", cleanedUser);
         console.log("🔑 Токен:", token);
@@ -113,25 +113,49 @@ function AuthView({ user }) {
     };
 
     const deleteAccount = async () => {
-        if (!window.confirm(" Ви впевнені, що хочете видалити акаунт?")) return;
+        if (!window.confirm("Ви впевнені, що хочете видалити акаунт (soft delete)?")) return;
 
         const userId = user?.id || user?.user_id;
         if (!userId) {
+            console.error("[deleteAccount] ❌ Не указан ID пользователя. user =", user);
             alert("❌ Помилка: ID користувача відсутній.");
             return;
         }
 
-        console.log("=== 🗑 Видалення акаунта ===");
-        console.log(`🔗 DELETE /users/${userId}`);
+        const token = user?.token || localStorage.getItem("token");
+        if (!token) {
+            alert("❌ Помилка: Токен відсутній.");
+            return;
+        }
+
+        console.log("=== 🗑 [deleteAccount] М'яке видалення акаунта ===");
+        const requestUrl = `${API_URL}/users/${userId}`;
+        console.log(`🔗 [deleteAccount] DELETE ${requestUrl}`);
 
         try {
-            await request(`/users/${userId}`, { method: "DELETE" });
-            console.log("✅ Акаунт успішно видалено");
+            const response = await fetch(requestUrl, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error("❌ Сервер повернув помилку:", response.status, errorData);
+                alert(`Помилка: ${response.status} - ${errorData}`);
+                return;
+            }
+
+            console.log("✅ [deleteAccount] Акаунт успішно помічено як видалений (soft delete)");
+
+            // Сбрасываем пользователя в контексте
             setUser(null);
             navigate("/");
         } catch (err) {
-            console.error("❌ Помилка видалення акаунта:", err);
-            alert("Помилка видалення. Можливо, сервер недоступний.");
+            console.error("❌ [deleteAccount] Помилка видалення акаунта:", err);
+            alert("Помилка видалення. Можливо, сервер недоступний або URL неверний.");
         }
     };
 
@@ -262,17 +286,6 @@ const styles = {
     outline: "none",
     transition: "border 0.3s ease",
   },
-  readOnly: {
-    width: "150px",
-    padding: "8px",
-    borderRadius: "5px",
-    border: "1px solid gray",
-    backgroundColor: "#333",
-    color: "#aaa",
-    textAlign: "center",
-    marginLeft: "10px",
-    cursor: "not-allowed",
-  },
   buttons: {
     marginTop: "30px",
     display: "flex",
@@ -301,14 +314,6 @@ const styles = {
     fontWeight: "bold",
     transition: "transform 0.2s ease",
   },
-};
-
-// Добавляем эффект при наведении (лучше через CSS, но для примера — inline)
-styles.saveButton[":hover"] = {
-  transform: "scale(1.05)",
-};
-styles.deleteButton[":hover"] = {
-  transform: "scale(1.05)",
 };
 
 export default Profile;
