@@ -21,8 +21,10 @@ function AuthView({ user }) {
     const { setUser } = useContext(AppContext);
     const navigate = useNavigate();
 
+    // Добавляем поле email в состояние формы
     const [formData, setFormData] = useState({
         name: "",
+        email: "",
         phone: "",
         city: "",
         address: "",
@@ -33,6 +35,8 @@ function AuthView({ user }) {
         if (user && Object.keys(user).length > 0) {
             setFormData({
                 name: user.name || "",
+                // Если есть email, берем первый элемент массива, иначе пустая строка
+                email: user.emails && user.emails.length > 0 ? user.emails[0] : "",
                 phone: user.phones?.[0] || "",
                 city: user.city || "",
                 address: user.address || "",
@@ -62,12 +66,15 @@ function AuthView({ user }) {
             return;
         }
 
+        // Формируем объект обновления, включая новый email, если он изменён
         const updatedUser = {
             name: formData.name || user.name,
             city: formData.city || user.city,
             address: formData.address || user.address,
             birthdate: formData.birthdate || user.birthdate,
             phones: formData.phone ? [formData.phone] : user.phones,
+            // Если email введён, передаем его как массив из одного элемента
+            emails: formData.email ? [formData.email] : user.emails,
         };
 
         // Удаляем пароль, если вдруг присутствует
@@ -183,6 +190,19 @@ function AuthView({ user }) {
                 </div>
 
                 <div style={styles.formGroup}>
+                    <label>Email:</label>
+                    <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        style={styles.input}
+                    />
+                </div>
+            </div>
+
+            <div style={styles.formRow}>
+                <div style={styles.formGroup}>
                     <label>Телефон:</label>
                     <input
                         type="text"
@@ -240,7 +260,6 @@ function AnonView() {
         </div>
     );
 }
-
 const styles = {
   container: {
     maxWidth: "600px",
