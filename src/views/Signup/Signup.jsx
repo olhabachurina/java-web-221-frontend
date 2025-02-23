@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import confetti from "canvas-confetti"; // Импорт конфетти
 
 
-
 const Signup = () => {
   const [name, setName] = useState("");
   const [login, setLogin] = useState("");

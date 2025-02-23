@@ -120,7 +120,7 @@ function AuthView({ user }) {
     };
 
     const deleteAccount = async () => {
-        if (!window.confirm("Ви впевнені, що хочете видалити акаунт (soft delete)?")) return;
+        if (!window.confirm("Ви впевнені, що хочете видалити акаунт.Такі да?")) return;
 
         const userId = user?.id || user?.user_id;
         if (!userId) {
