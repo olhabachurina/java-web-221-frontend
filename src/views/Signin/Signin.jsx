@@ -1,6 +1,10 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import AppContext from "../../AppContext"; // Импортируем контекст
+import AppContext from "../../AppContext"; 
+
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AppContext } from "./AppContext"; 
 
 function Signin() {
   const [login, setLogin] = useState("");
@@ -10,6 +14,7 @@ function Signin() {
   const navigate = useNavigate();
 
   const sendForm = () => {
+    // Кодируем логин и пароль в Base64 для Basic auth
     let credentials = btoa(`${login}:${password}`);
 
     fetch("http://localhost:8081/Java_Web_211_war/login", {
@@ -20,19 +25,19 @@ function Signin() {
       },
     })
       .then((response) => {
-        if (!response.ok) throw new Error(`Помилка сервера: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`Помилка сервера: ${response.status}`);
         return response.json();
       })
       .then((data) => {
         console.log("✅ Авторизація успішна:", data);
-
         if (data.token) {
           setUser({ ...data, token: data.token });
           localStorage.setItem("token", data.token);
+          localStorage.setItem("userId", data.user_id);
         } else {
           setUser(data);
         }
-
         navigate("/profile");
       })
       .catch((error) => {
@@ -58,18 +63,21 @@ function Signin() {
         placeholder="Пароль"
         style={styles.input}
       />
-      <button onClick={sendForm} style={styles.button}>Увійти</button>
-      {responseMessage && <p style={styles.errorMessage}>{responseMessage}</p>}
+      <button onClick={sendForm} style={styles.button}>
+        Увійти
+      </button>
+      {responseMessage && (
+        <p style={styles.errorMessage}>{responseMessage}</p>
+      )}
     </div>
   );
 }
 
-// ✅ Обновленные стили
 const styles = {
   container: {
     textAlign: "center",
     padding: "20px",
-    backgroundColor: "#000", // Черный фон
+    backgroundColor: "#000",
     height: "100vh",
     display: "flex",
     flexDirection: "column",
@@ -78,7 +86,7 @@ const styles = {
   },
   heading: {
     fontSize: "2.5rem",
-    color: "#61dafb", // Ярко-синий цвет заголовка
+    color: "#61dafb",
     marginBottom: "20px",
   },
   input: {
@@ -86,14 +94,14 @@ const styles = {
     padding: "12px",
     margin: "10px 0",
     borderRadius: "8px",
-    border: "2px solid #61dafb", // Голубая рамка
-    backgroundColor: "#111", // Темный фон полей ввода
-    color: "#61dafb", // Голубой текст
+    border: "2px solid #61dafb",
+    backgroundColor: "#111",
+    color: "#61dafb",
     fontSize: "1rem",
     textAlign: "center",
   },
   button: {
-    backgroundColor: "#61dafb", // Голубая кнопка
+    backgroundColor: "#61dafb",
     color: "#000",
     padding: "12px 20px",
     borderRadius: "8px",
@@ -107,11 +115,10 @@ const styles = {
     color: "red",
     fontSize: "1.2rem",
     marginTop: "15px",
-    backgroundColor: "#222", // Темный фон для выделения ошибки
+    backgroundColor: "#222",
     padding: "10px",
     borderRadius: "5px",
     border: "1px solid red",
-    animation: "shake 0.3s ease-in-out",
   },
 };
 
