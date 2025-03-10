@@ -4,41 +4,124 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #121212; /* Темный фон */
-  color: #ffffff; /* Белый текст */
   margin: 0;
-  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  animation: fadeIn 1.5s ease-in-out;
 }
 
+/* Анимация появления страницы */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Логотипы */
+.logos {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  opacity: 0.8;
+  transition: transform 0.5s ease-in-out;
+}
+
+/* Анимация вращения */
+.java-logo {
+  animation: rotateLogo 5s linear infinite;
+}
+
+.js-logo {
+  animation: rotateLogoReverse 5s linear infinite;
+}
+
+@keyframes rotateLogo {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotateLogoReverse {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* Заголовок с неоновым свечением */
 h1 {
-  color: #61dafb; /* Цвет заголовка */
   font-size: 3rem;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, #61dafb, #4a9ecf);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: glowText 2s infinite alternate;
 }
 
+@keyframes glowText {
+  from {
+    text-shadow: 0 0 10px rgba(97, 218, 251, 0.8);
+  }
+  to {
+    text-shadow: 0 0 20px rgba(97, 218, 251, 1), 0 0 30px rgba(97, 218, 251, 0.8);
+  }
+}
+
+/* Описание */
 p {
-  color: #ffffff; /* Белый текст для описания */
   font-size: 1.2rem;
-  margin-bottom: 30px;
-  text-align: center;
+  margin-bottom: 2rem;
 }
 
+/* Контейнер для кнопок */
+.buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* Стиль кнопок */
 button {
-  background-color: #61dafb; /* Голубой цвет кнопок */
-  color: #121212; /* Черный текст на кнопках */
+  background: linear-gradient(45deg, #61dafb, #4a9ecf);
+  color: #121212;
   border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 1rem;
+  border-radius: 30px;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
   cursor: pointer;
-  margin: 0 10px; /* Отступы между кнопками */
-  transition: background-color 0.3s;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 15px rgba(97, 218, 251, 0.4);
+  margin: 0 10px;
 }
 
+/* Эффект при наведении */
 button:hover {
-  background-color: #4a9ecf; /* Более темный оттенок при наведении */
+  background: linear-gradient(45deg, #4a9ecf, #61dafb);
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(97, 218, 251, 0.6);
 }
 
-.container {
-  text-align: center;
+/* Эффект нажатия */
+button:active {
+  transform: scale(0.95);
 }
