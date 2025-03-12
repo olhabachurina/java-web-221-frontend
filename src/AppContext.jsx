@@ -1,54 +1,67 @@
 import React, { createContext, useState, useEffect, useMemo } from "react";
 
-// Создаем контекст приложения
+// ✅ Адрес API
+const BASE_URL = "http://localhost:8081/Java_Web_211_war";
+
+// ✅ Создаем контекст приложения
 const AppContext = createContext();
 
-// Провайдер приложения
+// ✅ Провайдер приложения
 function AppProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // Получить профиль пользователя по токену
-  const fetchUser = () => {
+  // ✅ Получить профиль пользователя
+  const fetchUser = async () => {
     if (!token) return;
 
-    fetch("http://localhost:8081/Java_Web_211_war/users/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`❌ HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
-        console.log("✅ Профіль користувача:", data);
-        setUser({
-          ...data,
-          id: data.user_id || data.id,
-          role: data.role_id || data.role || "USER",
-        });
-      })
-      .catch((error) => {
-        console.error("❌ Помилка отримання профілю:", error);
-        logout();
+    try {
+      const res = await fetch(`${BASE_URL}/users/me`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
       });
+
+      if (res.status === 401) {
+        console.warn("⛔️ Токен недействителен. Автовыход...");
+        logout();
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(`❌ HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("✅ Профіль користувача:", data);
+
+      setUser({
+        ...data,
+        id: data.user_id || data.id,
+        role: data.role_id || data.role || "USER",
+      });
+
+    } catch (error) {
+      console.error("❌ Помилка отримання профілю:", error);
+      logout();
+    }
   };
 
-  // Загружаем профиль при изменении токена
+  // ✅ Загружаем профиль при изменении токена
   useEffect(() => {
     if (token) {
       fetchUser();
     }
   }, [token]);
 
-  // Логин пользователя — сохраняем токен и загружаем профиль
+  // ✅ Логин пользователя
   const login = (newToken) => {
     console.log("🔐 Токен збережено", newToken);
     localStorage.setItem("token", newToken);
     setToken(newToken);
-    fetchUser(); // Подтягиваем профиль сразу
   };
 
-  // Выход пользователя
+  // ✅ Выход пользователя
   const logout = () => {
     console.log("👋 Вихід із системи");
     localStorage.removeItem("token");
@@ -56,20 +69,51 @@ function AppProvider({ children }) {
     setUser(null);
   };
 
-  // Утилита для запросов с токеном
-  const request = (url, conf = {}) => {
+  // ✅ Универсальный запрос с авторизацией
+  const request = async (endpoint, conf = {}) => {
+    const url = `${BASE_URL}${endpoint}`;
     const headers = conf.headers || {};
+
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    return fetch(url, { ...conf, headers })
-      .then((response) => {
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        return response.json();
+    try {
+      console.log(`➡️ Запрос к API: ${url}`);
+      const res = await fetch(url, {
+        ...conf,
+        headers,
       });
+
+      if (res.status === 401) {
+        console.warn("⛔️ Авторизація неуспішна. Виконується вихід...");
+        logout();
+        throw new Error("❌ 401 Unauthorized");
+      }
+
+      if (!res.ok) {
+        console.error(`❌ HTTP error: ${res.status}`);
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const json = await res.json();
+        console.log("✅ Відповідь JSON:", json);
+        return json;
+      } else {
+        const text = await res.text();
+        console.warn("⚠️ Очікувався JSON, але прийшов інший формат:", text);
+        throw new Error("Response is not JSON");
+      }
+
+    } catch (error) {
+      console.error("❌ Помилка запиту:", error.message || error);
+      throw error;
+    }
   };
 
+  // ✅ Контекст, доступный детям
   const contextValue = useMemo(() => ({
     user,
     token,
