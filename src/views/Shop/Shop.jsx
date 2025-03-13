@@ -10,7 +10,7 @@ export default function Shop() {
 
   const navigate = useNavigate();
 
-  // Загружаем категории при монтировании компонента
+  
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -34,7 +34,7 @@ export default function Shop() {
     }
   };
 
-  // ✅ Навигация при выборе категории (используем slug)
+  // Навигация при выборе категории (используем slug)
   const handleCategoryClick = (categorySlug) => {
     console.log(`➡️ Переходим в категорию: ${categorySlug}`);
     navigate(`/category/${categorySlug}`);
@@ -47,7 +47,7 @@ export default function Shop() {
       {/* Сообщение */}
       {message && <div style={styles.message}>{message}</div>}
 
-      {/* ✅ Блок категорий */}
+      {/*  Блок категорий */}
       <section style={styles.categoriesBlock}>
         <h2>📂 Категорії</h2>
 
@@ -59,7 +59,7 @@ export default function Shop() {
               <div
                 key={category.categoryId}
                 style={styles.categoryCard}
-                onClick={() => handleCategoryClick(category.categorySlug)} // используем slug!
+                onClick={() => handleCategoryClick(category.categorySlug)} 
               >
                 <img
                   src={`${BASE_URL}/storage/${category.categoryImageId}`}
