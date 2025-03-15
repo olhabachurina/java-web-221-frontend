@@ -1,0 +1,128 @@
+.shop-container {
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #eee;
+    background: linear-gradient(145deg, #1f1f1f, #292929);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Заголовок */
+  .shop-title {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #fff;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+  }
+  .breadcrumbs {
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: #ccc;
+  }
+  
+  .breadcrumbs a {
+    color: #61dafb;
+    text-decoration: none;
+  }
+  
+  .breadcrumbs a:hover {
+    text-decoration: underline;
+  }
+  /* Повідомлення */
+  .shop-message {
+    background-color: #333;
+    color: #0f0;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+  }
+  
+  /* Блок категорій */
+  .categories-section {
+    width: 100%;
+    max-width: 1200px;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+    color: #ffa500;
+    margin-bottom: 20px;
+  }
+  
+  /* Сітка категорій */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+  
+  /* Картка категорії */
+  .category-card {
+    background: #2a2a2a;
+    border-radius: 12px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .category-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+  }
+  
+  /* Картинка категорії */
+  .category-image-container {
+    width: 100%;
+    height: 180px;
+    background-color: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .category-image {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.4s ease;
+  }
+  
+  .category-card:hover .category-image {
+    transform: scale(1.1);
+  }
+  
+  /* Текст категорії */
+  .category-title {
+    color: #fff;
+    font-size: 1.2rem;
+    margin: 15px 0;
+    transition: color 0.3s;
+  }
+  
+  .category-card:hover .category-title {
+    color: #00ffcc;
+  }
+  
+  /* Адаптація */
+  @media (max-width: 768px) {
+    .shop-title {
+      font-size: 2rem;
+    }
+  
+    .section-title {
+      font-size: 1.5rem;
+    }
+  
+    .categories-grid {
+      grid-template-columns: 1fr;
+    }
+  }

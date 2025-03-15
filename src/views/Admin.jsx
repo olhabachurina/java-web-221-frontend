@@ -15,7 +15,7 @@ export default function Admin() {
 
   const BASE_URL = "http://localhost:8081/Java_Web_211_war";
 
-  
+  // ====== INIT CHECK ======
   useEffect(() => {
     console.log("🔧 [Admin Init] Перевірка авторизації...");
     if (!user || !token) {
@@ -35,7 +35,7 @@ export default function Admin() {
     fetchProducts();
   }, [user, token, navigate]);
 
-  
+  // ====== CATEGORIES ======
   const fetchCategories = async () => {
     setLoading(true);
     console.log("🔄 [fetchCategories] Початок завантаження категорій...");
@@ -60,7 +60,7 @@ export default function Admin() {
     }
   };
 
-  
+  // ====== PRODUCTS ======
   const fetchProducts = async () => {
     setLoading(true);
     console.log("🔄 [fetchProducts] Початок завантаження товарів...");
@@ -85,7 +85,7 @@ export default function Admin() {
     }
   };
 
-  
+  // ====== ADD PRODUCT ======
   const addProduct = async (e) => {
     e.preventDefault();
 
@@ -100,7 +100,7 @@ export default function Admin() {
     try {
       const res = await fetch(`${BASE_URL}/products`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` }, 
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
@@ -122,7 +122,7 @@ export default function Admin() {
     }
   };
 
-  
+  // ====== SORTED PRODUCTS ======
   const sortedProducts = () => {
     console.log("🔽 [sortedProducts] Сортування:", sortType);
     let sorted = [...products];
@@ -147,7 +147,7 @@ export default function Admin() {
     return sorted;
   };
 
-  
+  // ====== JSX ======
   return (
     <div className="admin-panel">
       <h1 className="title">🛠️ Панель адміністратора</h1>
@@ -163,10 +163,12 @@ export default function Admin() {
           {categories.length > 0 ? (
             categories.map((c) => (
               <div key={c.categoryId} className="card category">
-                <img
-                  src={`${BASE_URL}/storage/${c.categoryImageId}`}
-                  alt={c.categoryTitle}
-                />
+                <div className="image-container">
+                  <img
+                    src={`${BASE_URL}/storage/${c.categoryImageId}`}
+                    alt={c.categoryTitle}
+                  />
+                </div>
                 <p>{c.categoryTitle}</p>
               </div>
             ))
@@ -202,42 +204,46 @@ export default function Admin() {
 
       {/* ТОВАРИ */}
       <section className="block products">
-        <h2>🛍️ Товари</h2>
+  <h2>🛍️ Товари</h2>
 
-        <div className="sort-block">
-          <label>🔽 Сортувати: </label>
-          <select value={sortType} onChange={(e) => setSortType(e.target.value)}>
-            <option value="default">Без сортування</option>
-            <option value="price_asc">Ціна ↑</option>
-            <option value="price_desc">Ціна ↓</option>
-            <option value="name_asc">Назва A-Z</option>
-            <option value="name_desc">Назва Z-A</option>
-          </select>
-        </div>
+  <div className="sort-block">
+    <label>🔽 Сортувати: </label>
+    <select value={sortType} onChange={(e) => setSortType(e.target.value)}>
+      <option value="default">Без сортування</option>
+      <option value="price_asc">Ціна ↑</option>
+      <option value="price_desc">Ціна ↓</option>
+      <option value="name_asc">Назва A-Z</option>
+      <option value="name_desc">Назва Z-A</option>
+    </select>
+  </div>
 
-        {loading ? (
-          <p>⏳ Завантаження товарів...</p>
-        ) : sortedProducts().length === 0 ? (
-          <p>🤷‍♀️ Товарів немає!</p>
-        ) : (
-          <div className="grid">
-            {sortedProducts().map((p) => (
-              <div key={p.productId} className="card product">
-                <img
-                  src={`${BASE_URL}/storage/${p.imageId}`}
-                  alt={p.name}
-                />
-                <div className="info">
-                  <h3>{p.name}</h3>
-                  <p>💰 {p.price} грн</p>
-                  <p>📦 {p.stock} шт.</p>
-                  <p>🏷️ Код: {p.code}</p>
-                </div>
-              </div>
-            ))}
+  {loading ? (
+    <p>⏳ Завантаження товарів...</p>
+  ) : sortedProducts().length === 0 ? (
+    <p>🤷‍♀️ Товарів немає!</p>
+  ) : (
+    <div className="grid">
+      {sortedProducts().map((p) => (
+        <div key={p.productId} className="card product">
+          <div className="image-container">
+            <img
+              src={`${BASE_URL}/storage/${p.imageId}`}
+              alt={p.name}
+            />
           </div>
-        )}
-      </section>
+          <div className="info">
+            <h3>{p.name}</h3>
+            <p>💰 {p.price} грн</p>
+            <p>📦 {p.stock} шт.</p>
+            <p>🏷️ Код: {p.code}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
+       
     </div>
   );
 }

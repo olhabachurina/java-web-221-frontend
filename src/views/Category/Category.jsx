@@ -1,33 +1,56 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { useParams, useNavigate, Link, useOutletContext } from "react-router-dom";
 import { AppContext } from "../../AppContext.jsx";
-import "../../PrivozTheme.css"; // Стилі, які наведу нижче
+import { CartContext } from "../Cartcontext/CartContext.jsx";
+import "../../PrivozTheme.css";
 
 const BASE_URL = "http://localhost:8081/Java_Web_211_war";
 
 export default function Category() {
-  const { id } = useParams(); // slug з URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const { request } = useContext(AppContext);
+  const { addToCart } = useContext(CartContext);
+
+  const { cartIconRef } = useOutletContext();
 
   const [category, setCategory] = useState(null);
+  const [categoriesList, setCategoriesList] = useState([]); // ✅ список усіх категорій
   const [products, setProducts] = useState([]);
   const [sortedProducts, setSortedProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sortOption, setSortOption] = useState("none");
 
-  // Нічна тема + автоматичне вмикання після 18:00
-  const [isNightMode, setIsNightMode] = useState(
-    new Date().getHours() >= 18
-  );
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [isNightMode, setIsNightMode] = useState(new Date().getHours() >= 18);
 
+  const productImageRefs = useRef([]);
+
+  // ✅ завантаження всіх категорій разом з конкретною категорією
   useEffect(() => {
+    loadAllCategories();
     loadCategoryBySlug(id);
   }, [id]);
 
   useEffect(() => {
     sortProducts(sortOption);
   }, [products, sortOption]);
+
+  useEffect(() => {
+    productImageRefs.current = sortedProducts.map(
+      (_, index) => productImageRefs.current[index] || React.createRef()
+    );
+  }, [sortedProducts]);
+
+  const loadAllCategories = async () => {
+    try {
+      const categoriesData = await request(`/products?type=categories`);
+      setCategoriesList(categoriesData);
+    } catch (error) {
+      console.error("❌ Помилка при завантаженні всіх категорій:", error);
+    }
+  };
 
   const loadCategoryBySlug = async (slug) => {
     setLoading(true);
@@ -85,12 +108,60 @@ export default function Category() {
     navigate(`/product/${productId}`);
   };
 
+  const handleAddToCartClick = (e, product, productImageRef) => {
+    e.stopPropagation();
+    addToCart(product);
+
+    const addSound = new Audio("/sounds/add-to-cart.mp3");
+    addSound.play();
+
+    showToastMessage(`🛒 "${product.name}" додано до кошика!`);
+
+    if (cartIconRef?.current && productImageRef?.current) {
+      flyToCart(productImageRef.current, cartIconRef.current);
+    }
+  };
+
+  const showToastMessage = (message) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   const toggleNightMode = () => {
     setIsNightMode(!isNightMode);
   };
 
   const getOdessaHumor = () => {
-    return `Ну шо я вам скажу... Це "${category?.categoryTitle}" – така краса, шо аж дух захоплює! А ціни – як на Привозі після 18:00! 😉`;
+    return `Ну шо я вам скажу... Це "${category?.categoryTitle}" – така краса, шо аж дух захоплює! 😉`;
+  };
+
+  const flyToCart = (imageElement, cartIcon) => {
+    const imageRect = imageElement.getBoundingClientRect();
+    const cartRect = cartIcon.getBoundingClientRect();
+
+    const flyingImage = imageElement.cloneNode(true);
+    flyingImage.style.position = "fixed";
+    flyingImage.style.top = `${imageRect.top}px`;
+    flyingImage.style.left = `${imageRect.left}px`;
+    flyingImage.style.width = `${imageRect.width}px`;
+    flyingImage.style.height = `${imageRect.height}px`;
+    flyingImage.style.transition = "all 1s ease-in-out";
+    flyingImage.style.zIndex = 1000;
+
+    document.body.appendChild(flyingImage);
+
+    requestAnimationFrame(() => {
+      flyingImage.style.top = `${cartRect.top + cartRect.height / 2}px`;
+      flyingImage.style.left = `${cartRect.left + cartRect.width / 2}px`;
+      flyingImage.style.width = "30px";
+      flyingImage.style.height = "30px";
+      flyingImage.style.opacity = "0.5";
+    });
+
+    flyingImage.addEventListener("transitionend", () => {
+      flyingImage.remove();
+    });
   };
 
   return (
@@ -101,8 +172,28 @@ export default function Category() {
         </button>
       </div>
 
+      {/* ✅ Хлебные крошки */}
+      <nav className="breadcrumbs animated-breadcrumbs">
+        <Link to="/">🏠 Головна</Link> <span className="separator">➜</span>{" "}
+        <Link to="/shop">🛍️ Крамниця</Link> <span className="separator">➜</span>{" "}
+        <span>📁 {category?.categoryTitle}</span>
+      </nav>
+
+      <div className="categories-sidebar">
+        <h3>📚 Інші категорії</h3>
+        <ul className="category-list">
+          {categoriesList.map((cat) => (
+            <li key={cat.categoryId}>
+              <Link to={`/category/${cat.categorySlug}`}>
+                📁 {cat.categoryTitle}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       {loading || !category ? (
-        <div className="loading">⏳ Завантаження даних з Привозу...</div>
+        <div className="loading">⏳ Завантаження даних...</div>
       ) : (
         <>
           <h1 className="category-title">📁 {category.categoryTitle}</h1>
@@ -143,13 +234,14 @@ export default function Category() {
 
           <div className="products-grid">
             {sortedProducts.length > 0 ? (
-              sortedProducts.map((product) => (
+              sortedProducts.map((product, index) => (
                 <div
                   key={product.productId}
                   className="product-card"
                   onClick={() => handleProductClick(product.productId)}
                 >
                   <img
+                    ref={productImageRefs.current[index]}
                     src={`${BASE_URL}/storage/${product.imageId}`}
                     alt={product.name}
                     className="product-image"
@@ -158,14 +250,26 @@ export default function Category() {
                   <p className="price">💰 {product.price} грн</p>
                   <p>📦 {product.stock} шт в наявності</p>
                   <p>🏷️ Код товару: {product.code}</p>
+
+                  <button
+                    className="btn-cart-add"
+                    onClick={(e) =>
+                      handleAddToCartClick(e, product, productImageRefs.current[index])
+                    }
+                    title="Додати до кошика"
+                  >
+                    🛒➕
+                  </button>
                 </div>
               ))
             ) : (
-              <p>🤷‍♂️ Товарів поки нема! А шо ви хотіли? Приходьте завтра!</p>
+              <p>🤷‍♂️ Товарів поки нема! Приходьте завтра!</p>
             )}
           </div>
         </>
       )}
+
+      {showToast && <div className="toast">{toastMessage}</div>}
     </div>
   );
 }

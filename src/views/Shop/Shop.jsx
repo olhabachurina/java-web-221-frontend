@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // додали Link для breadcrumbs
+import "./Shop.css";
 
 const BASE_URL = "http://localhost:8081/Java_Web_211_war";
 
@@ -10,12 +11,10 @@ export default function Shop() {
 
   const navigate = useNavigate();
 
-  
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  // ✅ Получение категорий
   const fetchCategories = async () => {
     setLoadingCategories(true);
     setMessage("⏳ Завантаження категорій...");
@@ -34,39 +33,45 @@ export default function Shop() {
     }
   };
 
-  // Навигация при выборе категории (используем slug)
   const handleCategoryClick = (categorySlug) => {
-    console.log(`➡️ Переходим в категорию: ${categorySlug}`);
+    console.log(`➡️ Переходимо до категорії: ${categorySlug}`);
     navigate(`/category/${categorySlug}`);
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>🛒 Крамниця</h1>
+    <div className="shop-container">
+      {/* Хлібні крихти */}
+      <nav className="breadcrumbs">
+        <Link to="/">Головна</Link> &gt; <span>Крамниця</span>
+      </nav>
 
-      {/* Сообщение */}
-      {message && <div style={styles.message}>{message}</div>}
+      <h1 className="shop-title">🛒 Крамниця</h1>
 
-      {/*  Блок категорий */}
-      <section style={styles.categoriesBlock}>
-        <h2>📂 Категорії</h2>
+      {/* Info / Loading Message */}
+      {message && <div className="shop-message">{message}</div>}
+
+      {/* Категорії */}
+      <section className="categories-section">
+        <h2 className="section-title">📂 Категорії</h2>
 
         {loadingCategories && <p>⏳ Завантаження категорій...</p>}
 
-        <div style={styles.categoriesGrid}>
+        <div className="categories-grid">
           {categories.length > 0 ? (
             categories.map((category) => (
               <div
                 key={category.categoryId}
-                style={styles.categoryCard}
-                onClick={() => handleCategoryClick(category.categorySlug)} 
+                className="category-card"
+                onClick={() => handleCategoryClick(category.categorySlug)}
               >
-                <img
-                  src={`${BASE_URL}/storage/${category.categoryImageId}`}
-                  alt={category.categoryTitle}
-                  style={styles.categoryImage}
-                />
-                <h3>{category.categoryTitle}</h3>
+                <div className="category-image-container">
+                  <img
+                    src={`${BASE_URL}/storage/${category.categoryImageId}`}
+                    alt={category.categoryTitle}
+                    className="category-image"
+                  />
+                </div>
+                <h3 className="category-title">{category.categoryTitle}</h3>
               </div>
             ))
           ) : !loadingCategories ? (
@@ -76,46 +81,4 @@ export default function Shop() {
       </section>
     </div>
   );
-}
-
-const styles = {
-  container: {
-    padding: "20px",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    color: "#333",
-  },
-  title: {
-    fontSize: "2.5rem",
-    marginBottom: "20px",
-  },
-  message: {
-    marginBottom: "20px",
-    fontSize: "1rem",
-    color: "#444",
-  },
-  categoriesBlock: {
-    marginBottom: "40px",
-  },
-  categoriesGrid: {
-    display: "flex",
-    gap: "20px",
-    flexWrap: "wrap",
-  },
-  categoryCard: {
-    width: "200px",
-    padding: "10px",
-    border: "2px solid #ccc",
-    borderRadius: "10px",
-    textAlign: "center",
-    cursor: "pointer",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-    transition: "transform 0.3s, border-color 0.3s",
-  },
-  categoryImage: {
-    width: "100%",
-    height: "150px",
-    objectFit: "cover",
-    borderRadius: "10px",
-    marginBottom: "10px",
-  },
-};
+} 
