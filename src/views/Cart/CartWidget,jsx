@@ -1,0 +1,38 @@
+import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CartContext } from "../Cartcontext/CartContext";
+import "./CartWidget.css";
+
+const CartWidget = () => {
+  const { totalItems, totalPrice } = useContext(CartContext);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCartClick = () => {
+    navigate("/cart");
+  };
+
+  const tooltipText =
+    totalItems > 0
+      ? `🛒 У кошику ${totalItems} товарів на суму ${totalPrice} грн.`
+      : "🛒 Кошик порожній";
+
+  return (
+    <div
+      className="cart-wrapper"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <button className="cart-button" onClick={handleCartClick}>
+        🛒 Кошик
+        <span className="cart-badge">({totalItems})</span>
+      </button>
+
+      <div className={`cart-tooltip ${showTooltip ? "visible" : ""}`}>
+        {tooltipText}
+      </div>
+    </div>
+  );
+};
+
+export default CartWidget;

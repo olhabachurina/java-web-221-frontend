@@ -1,0 +1,108 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+  
+  /* Темы */
+  .layout.day {
+    background-color: #fff9f0;
+    color: #333;
+  }
+  
+  .layout.night {
+    background-color: #121212;
+    color: #eee;
+  }
+  
+  /* Header */
+  .header {
+    background: #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    border-bottom: 2px solid #333;
+  }
+  
+  /* Логотип */
+  .logoText {
+    color: #61dafb;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-decoration: none;
+  }
+  
+  /* Навигация */
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .navLink {
+    background: linear-gradient(45deg, #61dafb, #4a9ecf);
+    color: #121212;
+    text-decoration: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(97, 218, 251, 0.4);
+  }
+  
+  .navLink:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(97, 218, 251, 0.5);
+  }
+  
+  .adminButton {
+    background: linear-gradient(45deg, #ff4b4b, #d32f2f);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(255, 0, 0, 0.4);
+  }
+  
+  .adminButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(255, 0, 0, 0.5);
+  }
+  
+  /* Кнопка темы */
+  .themeToggleBtn {
+    background-color: #ff9800;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .themeToggleBtn:hover {
+    background-color: #ffa726;
+    transform: scale(1.05);
+  }
+  
+  /* Main контент */
+  .main {
+    flex: 1;
+    padding: 30px;
+  }
+  
+  /* Footer */
+  .footer {
+    background: #222;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 0.9rem;
+    color: #aaa;
+  }

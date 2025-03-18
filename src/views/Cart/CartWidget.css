@@ -1,0 +1,66 @@
+.cart-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  
+  /* Кнопка кошика */
+  .cart-button {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    border: none;
+    color: #000;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 25px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .cart-button:hover {
+    background: linear-gradient(90deg, #0072ff, #00c6ff);
+  }
+  
+  .cart-badge {
+    margin-left: 8px;
+    color: #ff5722;
+    font-weight: bold;
+  }
+  
+  /* Tooltip базовий стан */
+  .cart-tooltip {
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background-color: #333;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  /* Стрілочка під тултипом */
+  .cart-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+  }
+  
+  /* Коли tooltip активний */
+  .cart-tooltip.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }

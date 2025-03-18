@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link, useOutletContext } from "react-router-dom";
 import { AppContext } from "../../AppContext.jsx";
 import { CartContext } from "../Cartcontext/CartContext.jsx";
+import { ThemeContext } from "../../ThemeContext.jsx"; // ✅ Подключаем глобальную тему!
 import "../../PrivozTheme.css";
 
 const BASE_URL = "http://localhost:8081/Java_Web_211_war";
@@ -11,25 +12,24 @@ export default function Category() {
   const navigate = useNavigate();
   const { request } = useContext(AppContext);
   const { addToCart } = useContext(CartContext);
-
   const { cartIconRef } = useOutletContext();
 
+  // ✅ Глобальная тема
+  const { theme, toggleTheme } = useContext(ThemeContext);
+
   const [category, setCategory] = useState(null);
-  const [categoriesList, setCategoriesList] = useState([]); // ✅ список усіх категорій
+  const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [sortedProducts, setSortedProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sortOption, setSortOption] = useState("none");
-
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [isNightMode, setIsNightMode] = useState(new Date().getHours() >= 18);
 
   const productImageRefs = useRef([]);
 
-  // ✅ завантаження всіх категорій разом з конкретною категорією
   useEffect(() => {
-    loadAllCategories();
+    fetchAllCategories();
     loadCategoryBySlug(id);
   }, [id]);
 
@@ -38,15 +38,13 @@ export default function Category() {
   }, [products, sortOption]);
 
   useEffect(() => {
-    productImageRefs.current = sortedProducts.map(
-      (_, index) => productImageRefs.current[index] || React.createRef()
-    );
+    productImageRefs.current = sortedProducts.map(() => React.createRef());
   }, [sortedProducts]);
 
-  const loadAllCategories = async () => {
+  const fetchAllCategories = async () => {
     try {
-      const categoriesData = await request(`/products?type=categories`);
-      setCategoriesList(categoriesData);
+      const data = await request(`/products?type=categories`);
+      setCategories(data);
     } catch (error) {
       console.error("❌ Помилка при завантаженні всіх категорій:", error);
     }
@@ -108,8 +106,9 @@ export default function Category() {
     navigate(`/product/${productId}`);
   };
 
-  const handleAddToCartClick = (e, product, productImageRef) => {
+  const handleAddToCartClick = (e, product, imageRef) => {
     e.stopPropagation();
+
     addToCart(product);
 
     const addSound = new Audio("/sounds/add-to-cart.mp3");
@@ -117,23 +116,17 @@ export default function Category() {
 
     showToastMessage(`🛒 "${product.name}" додано до кошика!`);
 
-    if (cartIconRef?.current && productImageRef?.current) {
-      flyToCart(productImageRef.current, cartIconRef.current);
+    if (cartIconRef?.current && imageRef?.current) {
+      flyToCart(imageRef.current, cartIconRef.current);
     }
+
+    console.log(`🛒 Додано в кошик: ${product.name}`);
   };
 
   const showToastMessage = (message) => {
     setToastMessage(message);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
-  };
-
-  const toggleNightMode = () => {
-    setIsNightMode(!isNightMode);
-  };
-
-  const getOdessaHumor = () => {
-    return `Ну шо я вам скажу... Це "${category?.categoryTitle}" – така краса, шо аж дух захоплює! 😉`;
   };
 
   const flyToCart = (imageElement, cartIcon) => {
@@ -164,38 +157,48 @@ export default function Category() {
     });
   };
 
+  const getOdessaHumor = () => {
+    return `Ну шо я вам скажу... Це "${category?.categoryTitle}" – така краса, шо аж дух захоплює! А ціни – як на Привозі після 18:00! 😉`;
+  };
+
+  const randomEmoji = () => {
+    const emojis = ["📁", "🗂️", "🪵", "🧱", "🪟", "🛒", "📦"];
+    return emojis[Math.floor(Math.random() * emojis.length)];
+  };
+
   return (
-    <div className={`privoz-container ${isNightMode ? "night" : "day"}`}>
+    <div className={`privoz-container ${theme}`}>
       <div className="top-bar">
-        <button onClick={toggleNightMode} className="toggle-btn">
-          {isNightMode ? "🌙 Нічний Привоз" : "☀️ Денний Привоз"}
-        </button>
+      
       </div>
 
-      {/* ✅ Хлебные крошки */}
+      {/* Хлебные крошки */}
       <nav className="breadcrumbs animated-breadcrumbs">
-        <Link to="/">🏠 Головна</Link> <span className="separator">➜</span>{" "}
-        <Link to="/shop">🛍️ Крамниця</Link> <span className="separator">➜</span>{" "}
+        <Link to="/">🏠 Головна</Link>
+        <span className="separator">➜</span>
+        <Link to="/shop">🛍️ Крамниця</Link>
+        <span className="separator">➜</span>
         <span>📁 {category?.categoryTitle}</span>
       </nav>
 
-      <div className="categories-sidebar">
-        <h3>📚 Інші категорії</h3>
-        <ul className="category-list">
-          {categoriesList.map((cat) => (
+      {/* Боковая панель з іншими категоріями */}
+      <aside className="sidebar-categories">
+        <h2>📚 Інші категорії</h2>
+        <ul>
+          {categories.map((cat) => (
             <li key={cat.categoryId}>
               <Link to={`/category/${cat.categorySlug}`}>
-                📁 {cat.categoryTitle}
+                {randomEmoji()} {cat.categoryTitle}
               </Link>
             </li>
           ))}
         </ul>
-      </div>
+      </aside>
 
       {loading || !category ? (
-        <div className="loading">⏳ Завантаження даних...</div>
+        <div className="loading">⏳ Завантаження даних з Привозу...</div>
       ) : (
-        <>
+        <div className="category-content">
           <h1 className="category-title">📁 {category.categoryTitle}</h1>
 
           <div className="category-image-block">
@@ -246,6 +249,7 @@ export default function Category() {
                     alt={product.name}
                     className="product-image"
                   />
+
                   <h3>{product.name}</h3>
                   <p className="price">💰 {product.price} грн</p>
                   <p>📦 {product.stock} шт в наявності</p>
@@ -254,7 +258,11 @@ export default function Category() {
                   <button
                     className="btn-cart-add"
                     onClick={(e) =>
-                      handleAddToCartClick(e, product, productImageRefs.current[index])
+                      handleAddToCartClick(
+                        e,
+                        product,
+                        productImageRefs.current[index]
+                      )
                     }
                     title="Додати до кошика"
                   >
@@ -263,10 +271,10 @@ export default function Category() {
                 </div>
               ))
             ) : (
-              <p>🤷‍♂️ Товарів поки нема! Приходьте завтра!</p>
+              <p>🤷‍♂️ Товарів поки нема! А шо ви хотіли? Приходьте завтра!</p>
             )}
           </div>
-        </>
+        </div>
       )}
 
       {showToast && <div className="toast">{toastMessage}</div>}
