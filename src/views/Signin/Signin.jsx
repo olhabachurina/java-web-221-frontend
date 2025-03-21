@@ -7,43 +7,73 @@ function Signin() {
   const [password, setPassword] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { login } = useContext(AppContext);
   const navigate = useNavigate();
 
   const sendForm = async () => {
-    if (!loginValue || !password) {
+    const cleanLogin = loginValue.trim();
+    const cleanPassword = password.trim();
+
+    if (!cleanLogin || !cleanPassword) {
       setResponseMessage("❌ Логін і пароль обов'язкові!");
       return;
     }
 
-    const credentials = btoa(`${loginValue}:${password}`);
+    console.log("➡️ Попытка входа с:");
+    console.log("Логин:", cleanLogin);
+    console.log("Пароль:", cleanPassword);
+
+    const credentials = btoa(`${cleanLogin}:${cleanPassword}`);
+    console.log("➡️ Base64 Credentials:", credentials);
+
+    setIsLoading(true);
+    setResponseMessage("");
 
     try {
       const response = await fetch("http://localhost:8081/Java_Web_211_war/login", {
         method: "POST",
         headers: {
           Authorization: `Basic ${credentials}`,
+          "Content-Type": "application/json",
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`❌ Помилка сервера: ${response.status}`);
+      console.log(`➡️ Ответ сервера: ${response.status}`);
+
+      const resultText = await response.text();
+
+      let result;
+      try {
+        result = JSON.parse(resultText);
+      } catch (e) {
+        console.error("❌ Ответ не JSON:", resultText);
+        setResponseMessage("❌ Некорректный ответ от сервера");
+        return;
       }
 
-      const data = await response.json();
-      console.log("✅ Авторизація успішна:", data);
+      if (!response.ok) {
+        console.error("❌ Ошибка авторизации:", result);
+        setResponseMessage(`❌ ${result.error || "Ошибка входа"}`);
+        setPassword("");
+        return;
+      }
 
-      if (data.token) {
-        login(data.token);
+      console.log("✅ Авторизация успешна:", result);
+
+      if (result.token) {
+        login(result.token);
         navigate("/profile");
       } else {
-        throw new Error("⚠️ Сервер не повернув токен!");
+        setResponseMessage("⚠️ Сервер не вернул токен");
       }
+
     } catch (error) {
-      console.error("❌ Помилка входу:", error);
-      setResponseMessage("❌ Невірний логін або пароль!");
-      setPassword("");
+      console.error("❌ Сетевая ошибка:", error);
+      setResponseMessage("❌ Не удалось соединиться с сервером");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,7 +90,10 @@ function Signin() {
         value={loginValue}
         onChange={(e) => setLoginValue(e.target.value)}
         placeholder="Логін"
-        style={styles.input}
+        style={{
+          ...styles.input,
+          borderColor: responseMessage && !loginValue ? "#ff4c4c" : "#61dafb",
+        }}
         onKeyDown={handleKeyDown}
       />
 
@@ -70,19 +103,31 @@ function Signin() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Пароль"
-          style={styles.input}
+          style={{
+            ...styles.input,
+            borderColor: responseMessage && !password ? "#ff4c4c" : "#61dafb",
+          }}
           onKeyDown={handleKeyDown}
         />
         <button
           onClick={() => setShowPassword(!showPassword)}
           style={styles.showPasswordButton}
+          type="button"
         >
           {showPassword ? "🙈" : "👁"}
         </button>
       </div>
 
-      <button onClick={sendForm} style={styles.button}>
-        🚀 Увійти
+      <button
+        onClick={sendForm}
+        style={{
+          ...styles.button,
+          backgroundColor: !loginValue || !password ? "#555" : "#61dafb",
+          cursor: !loginValue || !password || isLoading ? "not-allowed" : "pointer",
+        }}
+        disabled={!loginValue || !password || isLoading}
+      >
+        {isLoading ? "⏳ Входимо..." : "🚀 Увійти"}
       </button>
 
       {responseMessage && <p style={styles.errorMessage}>{responseMessage}</p>}
@@ -101,7 +146,11 @@ const styles = {
     borderRadius: "10px",
     boxShadow: "0px 4px 10px rgba(0,0,0,0.3)",
   },
-  heading: { fontSize: "2rem", marginBottom: "20px", color: "#FFD700" },
+  heading: {
+    fontSize: "2rem",
+    marginBottom: "20px",
+    color: "#FFD700",
+  },
   input: {
     width: "100%",
     padding: "10px",
@@ -111,8 +160,14 @@ const styles = {
     backgroundColor: "#222",
     color: "#fff",
     fontSize: "16px",
+    outline: "none",
+    transition: "border-color 0.3s ease",
   },
-  passwordContainer: { position: "relative", display: "flex", alignItems: "center" },
+  passwordContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
   showPasswordButton: {
     position: "absolute",
     right: "10px",
@@ -132,8 +187,14 @@ const styles = {
     cursor: "pointer",
     color: "#fff",
     fontWeight: "bold",
+    transition: "background-color 0.3s ease, cursor 0.3s ease",
   },
-  errorMessage: { color: "#ff4c4c", marginTop: "10px", fontSize: "14px" },
+  errorMessage: {
+    color: "#ff4c4c",
+    marginTop: "10px",
+    fontSize: "14px",
+    transition: "opacity 0.3s ease",
+  },
 };
 
 export default Signin;

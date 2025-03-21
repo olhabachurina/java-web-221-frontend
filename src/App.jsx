@@ -15,13 +15,14 @@ import Category from "./views/Category/Category";
 import Product from "./views/Product/Product";
 import CartPage from "./views/Cart/CartPage";
 import Layout from "./views/Layout/Layout";
+import CheckoutPage from "./views/CheckoutPage.jsx";
 
 function App() {
   return (
-    <ThemeProvider>
-      <AppProvider>
-        <CartProvider> {/* 👉 контекст корзины */}
-          <Router>
+    <Router>
+      <ThemeProvider>
+        <AppProvider>
+          <CartProvider>
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Home />} />
@@ -33,12 +34,13 @@ function App() {
                 <Route path="/category/:id" element={<Category />} />
                 <Route path="/product/:id" element={<Product />} />
                 <Route path="/cart" element={<CartPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
               </Route>
             </Routes>
-          </Router>
-        </CartProvider>
-      </AppProvider>
-    </ThemeProvider>
+          </CartProvider>
+        </AppProvider>
+      </ThemeProvider>
+    </Router>
   );
 }
 
